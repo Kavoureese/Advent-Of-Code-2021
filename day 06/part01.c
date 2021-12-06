@@ -6,23 +6,24 @@
 typedef uint8_t u8;
 typedef uint16_t u16;
 typedef uint32_t u32;
+typedef uint64_t u64;
 
 #define NEW_TIME 6
-#define SIMULATED_DAYS 13
+#define SIMULATED_DAYS 256
 
 typedef struct lantern_struct {u8 cur_time; struct lantern_struct *next;} lanfish;
 
 void add_new_fish(lanfish*);
 void print_children(lanfish*);
 void check_children(lanfish*);
-u32 count_children(lanfish*);
+u64 count_children(lanfish*);
 
 int main(void)
 {
 	FILE *file;
-	u8 input_len = 1;
+	u16 input_len = 1;
 	u16 i, j;
-	char buf[25], *token;
+	char buf[1024], *token;
 	lanfish *arr;
 
 	file = fopen("input.txt", "r");
@@ -32,12 +33,13 @@ int main(void)
 		exit(1);
 	}
 	
-	fgets(buf, 25, file);
+	fgets(buf, 1024, file);
 	fclose(file);
+
 	for(i = 0; buf[i] != '\0'; ++i)
 		if(buf[i] == ',')
 			++input_len;
-	
+		
 	arr = (lanfish*) malloc(sizeof(lanfish)*input_len);
 	
 	i = 0;
@@ -63,18 +65,13 @@ int main(void)
 			else
 				--arr[j].cur_time;
 		}
+		fprintf(stdout, "Day %d completed.\n", i);
 	}
 	
-	for(i = 0; i < input_len; ++i)
-	{
-		print_children(&arr[i]);
-		printf("\n");
-	}
-	
-	u32 total_pop = 0;
+	u64 total_pop = 0;
 	for(i = 0; i < input_len; ++i)
 		total_pop += count_children(&arr[i]);
-	printf("Total pop: %d\n", total_pop);
+	printf("Total pop: %ld\n", total_pop);
 	
 	return 0;
 }
@@ -100,13 +97,16 @@ void print_children(lanfish *p)
 
 void check_children(lanfish *p)
 {
+	lanfish *t;
 	p = p->next;
+	u32 children_to_add = 0;
 	
 	while(p != NULL)
 	{
+		t = p;
 		if(p->cur_time == 0)
 		{
-			add_new_fish(p);
+			++children_to_add;
 			p->cur_time = NEW_TIME;
 		}
 		else
@@ -114,11 +114,16 @@ void check_children(lanfish *p)
 		
 		p = p->next;
 	}
+	while(children_to_add > 0)
+	{
+		add_new_fish(t);
+		--children_to_add;
+	}
 }
 
-u32 count_children(lanfish *p)
+u64 count_children(lanfish *p)
 {
-	u32 pop = 0;
+	u64 pop = 0;
 	while(p != NULL)
 	{
 		++pop;
