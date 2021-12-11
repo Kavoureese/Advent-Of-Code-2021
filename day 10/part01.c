@@ -31,6 +31,7 @@ int main(void)
 		
 		score += is_corrupted(buf, temp);
 	}
+	fclose(file);
 	
 	fprintf(stdout, "Score: %u\n", score);
 	

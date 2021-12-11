@@ -33,6 +33,7 @@ int main(void)
 		scores[i++] = is_incomplete(buf, temp);
 		++input_len;
 	}
+	fclose(file);
 	
 	insertionSort(scores, input_len);
 	
